@@ -3,14 +3,21 @@ import "./App.css";
 import Dies from "./components/Dies";
 import { nanoid } from "nanoid";
 import Confetti from "react-confetti";
-import { useWindowSize } from 'react-use'
+import { useWindowSize } from "react-use";
 
 function App() {
   const [dice, setDice] = React.useState(() => generateAllNewDice());
+  const buttonRef = React.useRef(null);
 
   const gameWon =
     dice.every((die) => die.isHeld) &&
     dice.every((die) => die.value === dice[0].value);
+
+  React.useEffect(() => {
+    if (gameWon) {
+      buttonRef.current.focus();
+    }
+  }, [gameWon]);
 
   function generateAllNewDice() {
     const randomdices = [];
@@ -32,7 +39,11 @@ function App() {
         return oldDice.map((dice) => {
           return dice.isHeld
             ? dice
-            : { ...dice, value: Math.floor(Math.random() * 6) + 1, id: nanoid() };
+            : {
+                ...dice,
+                value: Math.floor(Math.random() * 6) + 1,
+                id: nanoid(),
+              };
         });
       });
     }
@@ -71,12 +82,14 @@ function App() {
         current value between rolls.
       </p>
       <div className="dies-container">{diceElements}</div>
-      <button className="roll-dice" onClick={rollDices}>
+      <button ref={buttonRef} className="roll-dice" onClick={rollDices}>
         {gameWon ? "New Game" : "Roll"}
       </button>
       {gameWon && <Confetti width={width} height={height} />}
       <div aria-live="polite" className="sr-only">
-        {gameWon ? "Congratulations! You've won the game! Press New Game to start again." : "Keep rolling!"}
+        {gameWon
+          ? "Congratulations! You've won the game! Press New Game to start again."
+          : "Keep rolling!"}
       </div>
     </main>
   );
